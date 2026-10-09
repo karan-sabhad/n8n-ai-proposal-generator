@@ -1,0 +1,287 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9884245f-d597-4da9-adb7-44eb3d12902e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:3000/api/sessions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "waha-api-key-12345"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "315da5ab-3bc6-417d-9271-74d675aaa7a9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "waha-api-key-12345"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"session\": \"veronic\",\n  \"chatId\": \"919510075279@c.us\",\n  \"text\": \"Hello from VERONIC AI Bot! 👋\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        240,
+        -208
+      ],
+      "id": "cb25fce9-477a-4a91-9c8e-251784d0e683",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e28c049e-d4fe-4af2-becc-c6025fadefd3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        -48
+      ],
+      "id": "784dfaba-67d2-475e-9a21-e5f355291ae4",
+      "name": "Webhook",
+      "webhookId": "e28c049e-d4fe-4af2-becc-c6025fadefd3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef878aea-301f-4c1b-b523-fd440a527ba0",
+              "name": "message",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "cba539f4-bc9a-4275-8adc-04b2690ae8e1",
+              "name": "chatId",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        944,
+        -48
+      ],
+      "id": "a8435512-68a1-4052-93e5-fb3db40693f1",
+      "name": "Extract Message"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "You are VERONIC's WhatsApp AI assistant.\n\nCompany: VERONIC\nTagline: Building the Future, Digitally.\n\nServices:\n- Website Development\n- Mobile Apps\n- AI Automation\n- Custom Software\n- Digital Marketing\n- Branding & Design\n\nContact:\nPhone: +91 88661 13864\nEmail: veronic.infotech@gmail.com\nLocation: Saurashtra University, Munjka, Rajkot, near Rao Infotech.\n\nRules:\n- Reply naturally like a helpful human.\n- Understand Gujarati, English, and Gujarati-English mixed messages.\n- Reply in the client's language. If the client uses Gujarati, prefer Gujarati.\n- Never invent company information, services, prices, packages, or promises.\n- Keep replies clear and concise.\n- If the client asks about a service, explain it briefly and offer to understand their requirement.\n- Ask only one question at a time.\n- Do not ask again for information the client has already provided."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1168,
+        -48
+      ],
+      "id": "27c89b8f-b627-4990-bcd3-3889830417df",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        160
+      ],
+      "id": "58ea4e5f-8218-49ae-af11-4c08bcf698e4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4LTCzLKm3Dx7J5aW",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d6e92ec-df10-499b-b596-9c5d3137165c",
+              "name": "aiReply",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1536,
+        -48
+      ],
+      "id": "370151ea-77be-4ac8-acc7-84297f2b59d6",
+      "name": "AI Reply"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "waha-api-key-12345"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "options": {},
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: \"veronic\", chatId: $(\"Extract Message\").item.json.chatId, text: $json.aiReply }) }}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        -48
+      ],
+      "id": "064853d9-1397-41b0-9f12-9d04e0facf86",
+      "name": "HTTP Request2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Reply": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c6ae724e-f5c8-4770-b343-bfaeafee5060",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7262c3ac183c9ed71e54a6fd88b05b31c82c9234c45187581028ec1a52911655"
+  },
+  "nodeGroups": [],
+  "id": "gknCWr0K23PMZUX4",
+  "tags": []
+}
